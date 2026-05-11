@@ -5,16 +5,16 @@
 }
 
 :root {
-  --neon-green: #3bff4f;
-  --deep-blue: #03153b;
-  --pepsi-blue: #1858ff;
-  --electric-cyan: #2de6ff;
-  --chrome-light: #dfe9ff;
-  --chrome-mid: #8ea1ca;
-  --chrome-dark: #2c3f67;
-  --danger-red: #ff2d35;
-  --black: #05070e;
-  --panel-shadow: rgba(0, 0, 0, 0.6);
+  --neon-green: #39ff50;
+  --deep-blue: #0066dd;
+  --pepsi-blue: #0099ff;
+  --electric-cyan: #00d4ff;
+  --chrome-light: #e8f4ff;
+  --chrome-mid: #9cb8e0;
+  --chrome-dark: #3d5a8c;
+  --danger-red: #ff3344;
+  --black: #0a1628;
+  --panel-shadow: rgba(0, 0, 0, 0.45);
 }
 
 body {
@@ -22,9 +22,25 @@ body {
   overflow: hidden;
   color: #f3f9ff;
   background:
-    radial-gradient(circle at 20% 15%, rgba(45, 230, 255, 0.25), transparent 30%),
-    radial-gradient(circle at 82% 78%, rgba(24, 88, 255, 0.3), transparent 35%),
-    linear-gradient(135deg, #02122e 0%, #030913 55%, #010103 100%);
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.4), transparent 35%),
+    radial-gradient(ellipse at 30% 0%, rgba(0, 212, 255, 0.6), transparent 50%),
+    radial-gradient(ellipse at 70% 100%, rgba(24, 88, 255, 0.5), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(59, 255, 79, 0.2), transparent 40%),
+    linear-gradient(180deg, #0099ff 0%, #0066dd 50%, #003388 100%);
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2), transparent 20%),
+    radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.25), transparent 25%),
+    radial-gradient(ellipse at 50% 100%, rgba(59, 255, 79, 0.15), transparent 30%);
+  opacity: 0.7;
 }
 
 .retro-backdrop {
@@ -35,20 +51,64 @@ body {
   background:
     repeating-linear-gradient(
       90deg,
-      rgba(59, 255, 79, 0.45) 0,
-      rgba(59, 255, 79, 0.45) 1px,
-      transparent 1px,
-      transparent 24px
+      rgba(0, 212, 255, 0.25) 0,
+      transparent 2px,
+      transparent 30px
     ),
     repeating-linear-gradient(
       0deg,
-      rgba(59, 255, 79, 0.28) 0,
-      rgba(59, 255, 79, 0.28) 1px,
-      transparent 1px,
-      transparent 24px
+      rgba(0, 212, 255, 0.25) 0,
+      transparent 2px,
+      transparent 30px
     ),
-    radial-gradient(circle at 32% 30%, rgba(59, 255, 79, 0.09), transparent 35%);
-  filter: saturate(1.15);
+    radial-gradient(circle at 50% 50%, transparent 40%, rgba(0, 102, 221, 0.3) 100%),
+    radial-gradient(ellipse 600px 300px at 50% 0%, rgba(255, 255, 255, 0.1), transparent);
+  filter: saturate(1.4) brightness(1.1);
+  animation: backdrop-glow 6s ease-in-out infinite alternate;
+}
+
+@keyframes backdrop-glow {
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: 
+    linear-gradient(
+      45deg,
+      transparent 0%,
+      rgba(0, 212, 255, 0.1) 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.08) 75%,
+      transparent 100%
+    );
+  background-size: 400% 400%;
+  animation: holographic-sweep 12s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+@keyframes holographic-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .retro-header {
@@ -106,7 +166,8 @@ body {
   width: 100vw;
   height: 100vh;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  filter: brightness(1.05) saturate(1.1);
 }
 
 #ui-overlay {
@@ -158,6 +219,11 @@ body {
   box-shadow:
     inset 0 0 0 2px #2b3f6b,
     0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.btn-link {
+  text-decoration: none;
+  display: inline-block;
 }
 
 button {

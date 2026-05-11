@@ -663,10 +663,6 @@ window.addEventListener('keydown', (event) => {
 });
 
 // Button controls
-document.getElementById('btn-screen').addEventListener('click', () => {
-  dispatchPhoneAction({ action: 'select', source: 'ui' });
-});
-
 let autoRotating = false;
 document.getElementById('btn-rotate').addEventListener('click', () => {
   autoRotating = !autoRotating;

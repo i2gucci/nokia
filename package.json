@@ -2,9 +2,9 @@
   "name": "phone-3d-interactive",
   "version": "1.0.0",
   "description": "Interactive 3D Nokia phone with retro LCD UI and physical controls",
-  "main": "phone-3d-starter.html",
+  "main": "index.html",
   "scripts": {
-    "dev": "live-server --port=3000 --open=phone-3d-starter.html",
+    "dev": "live-server --port=3000 --open=index.html",
     "start": "npm run dev"
   },
   "keywords": [
