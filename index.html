@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nokia 3310 - Interactive</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Import map for Three.js modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="retro-backdrop" aria-hidden="true"></div>
+
+  <header class="retro-header">
+    <div class="retro-stamp">NOKIA 3310 // @TheNokia3310</div>
+    <div class="retro-ticker-wrap">
+      <div class="retro-ticker">WELCOME TO NOKIA 3310 /// CLICK THE BUTTONS TO EXPLORE ///</div>
+    </div>
+  </header>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading 3D Model...</p>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <div id="ui-overlay">
+    <p>Drag with left click to rotate the scene. Hold right click and drag to pan. Scroll to zoom. Click the phone keys or use your keyboard to navigate.</p>
+  </div>
+
+  <aside class="nokia-banner-ad">
+    <img src="assets/nokia.gif" alt="Nokia 3310 banner" />
+  </aside>
+
+  <!-- Gallery Modal -->
+  <div id="gallery-modal" class="gallery-modal hidden">
+    <div class="gallery-container">
+      <div class="gallery-header">
+        <h2>NOKIA MEME VAULT</h2>
+        <button id="gallery-close" class="gallery-close">×</button>
+      </div>
+      <div class="gallery-grid">
+        <img src="assets/gallery/0_bNntnCti0yKN9_ns.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/0_RdaYbQuDegiKpIX1.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/488008797_4107998012810874_8948239243197166223_n.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/4szwbw.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/633998878_18392079757149584_5389422327793667988_n.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/6689929_460s.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/7jsdbnn6no561.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/82829929_2480895525560554_6120015431123075072_n.jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/images (6).jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/images (7).jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/images (8).jpg" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/s2567u3ZCJBmo3TREWNtTB.png" alt="Nokia meme" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="btn-screen">Select / Open</button>
+    <button id="btn-gallery">Meme Vault</button>
+    <button id="btn-rotate">Auto Rotate</button>
+    <button id="btn-reset">Reset + Home</button>
+  </div>
+
+  <!-- Audio assets -->
+  <audio id="ringtone" src="assets/ringtone.mp3" preload="auto"></audio>
+  <audio id="numbersSound" src="assets/numbers.mp3" preload="auto"></audio>
+
+  <!-- GSAP for animations -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <!-- Main script as ES module -->
+  <script type="module" src="js/script.js"></script>
+  <script>
+    // Gallery modal controls
+    const galleryModal = document.getElementById('gallery-modal');
+    const galleryBtn = document.getElementById('btn-gallery');
+    const galleryClose = document.getElementById('gallery-close');
+
+    galleryBtn.addEventListener('click', () => {
+      galleryModal.classList.remove('hidden');
+    });
+
+    galleryClose.addEventListener('click', () => {
+      galleryModal.classList.add('hidden');
+    });
+
+    galleryModal.addEventListener('click', (e) => {
+      if (e.target === galleryModal) {
+        galleryModal.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

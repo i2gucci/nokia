@@ -1,0 +1,22 @@
+{
+  "name": "phone-3d-interactive",
+  "version": "1.0.0",
+  "description": "Interactive 3D Nokia phone with retro LCD UI and physical controls",
+  "main": "phone-3d-starter.html",
+  "scripts": {
+    "dev": "live-server --port=3000 --open=phone-3d-starter.html",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "threejs",
+    "3d",
+    "phone",
+    "interactive",
+    "webgl"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
