@@ -31,8 +31,11 @@
   </header>
 
   <div id="loading">
-    <div class="spinner"></div>
-    <p>Loading 3D Model...</p>
+    <p class="loading-text">3Dモデルを読み込んでいます...</p>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <p class="loading-percent">0%</p>
   </div>
 
   <div id="canvas-container"></div>
@@ -53,20 +56,26 @@
         <button id="gallery-close" class="gallery-close">×</button>
       </div>
       <div class="gallery-grid">
-        <img src="assets/gallery/0_bNntnCti0yKN9_ns.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/0_RdaYbQuDegiKpIX1.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/488008797_4107998012810874_8948239243197166223_n.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/4szwbw.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/633998878_18392079757149584_5389422327793667988_n.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/6689929_460s.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/7jsdbnn6no561.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/82829929_2480895525560554_6120015431123075072_n.jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/images (6).jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/images (7).jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/images (8).jpg" alt="Nokia meme" loading="lazy">
-        <img src="assets/gallery/s2567u3ZCJBmo3TREWNtTB.png" alt="Nokia meme" loading="lazy">
+        <img src="assets/gallery/0_bNntnCti0yKN9_ns.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/0_RdaYbQuDegiKpIX1.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/488008797_4107998012810874_8948239243197166223_n.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/4szwbw.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/633998878_18392079757149584_5389422327793667988_n.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/6689929_460s.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/7jsdbnn6no561.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/82829929_2480895525560554_6120015431123075072_n.jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/images (6).jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/images (7).jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/images (8).jpg" alt="Nokia meme" loading="lazy" class="gallery-thumb">
+        <img src="assets/gallery/s2567u3ZCJBmo3TREWNtTB.png" alt="Nokia meme" loading="lazy" class="gallery-thumb">
       </div>
     </div>
+  </div>
+
+  <!-- Lightbox Viewer -->
+  <div id="lightbox" class="lightbox hidden">
+    <button id="lightbox-close" class="lightbox-close">×</button>
+    <img id="lightbox-img" src="" alt="" />
   </div>
 
   <div class="controls">
@@ -89,6 +98,9 @@
     const galleryModal = document.getElementById('gallery-modal');
     const galleryBtn = document.getElementById('btn-gallery');
     const galleryClose = document.getElementById('gallery-close');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
 
     galleryBtn.addEventListener('click', () => {
       galleryModal.classList.remove('hidden');
@@ -102,6 +114,31 @@
       if (e.target === galleryModal) {
         galleryModal.classList.add('hidden');
       }
+    });
+
+    // Lightbox controls
+    document.querySelectorAll('.gallery-thumb').forEach(img => {
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.remove('hidden');
+      });
+    });
+
+    lightboxClose.addEventListener('click', () => {
+      lightbox.classList.add('hidden');
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target === lightboxImg) {
+        lightbox.classList.add('hidden');
+      }
+    });
+
+    // Prevent lightbox close when right-clicking image
+    lightboxImg.addEventListener('contextmenu', (e) => {
+      e.stopPropagation();
     });
   </script>
 </body>

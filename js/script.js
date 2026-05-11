@@ -578,13 +578,19 @@ function loadPhoneModel() {
         return;
       }
       const percent = Math.round((progress.loaded / progress.total) * 100);
-      const loadingText = document.querySelector('#loading p');
-      loadingText.textContent = `Loading 3D Model... ${percent}%`;
+      const loadingBar = document.querySelector('.loading-bar');
+      const loadingPercent = document.querySelector('.loading-percent');
+      if (loadingBar) {
+        loadingBar.style.width = `${percent}%`;
+      }
+      if (loadingPercent) {
+        loadingPercent.textContent = `${percent}%`;
+      }
     },
     (error) => {
       console.error('Error loading model:', error);
-      const loadingText = document.querySelector('#loading p');
-      loadingText.textContent = 'Failed to load model';
+      const loadingText = document.querySelector('.loading-text');
+      loadingText.textContent = '読み込みに失敗しました';
     }
   );
 }

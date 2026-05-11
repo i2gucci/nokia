@@ -220,23 +220,50 @@ button:active {
   pointer-events: none;
 }
 
-#loading p {
+.loading-text {
   font-family: 'VT323', monospace;
-  font-size: clamp(24px, 2.4vw, 34px);
+  font-size: clamp(20px, 2.2vw, 28px);
+  margin-bottom: 24px;
+  letter-spacing: 1px;
 }
 
-.spinner {
-  width: 52px;
-  height: 52px;
-  border: 4px solid rgba(255, 255, 255, 0.26);
-  border-top-color: var(--neon-green);
-  border-radius: 8px;
-  animation: spin 0.9s linear infinite;
-  margin-bottom: 18px;
+.loading-bar-container {
+  width: 320px;
+  max-width: 80vw;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 3px solid var(--neon-green);
+  box-shadow: 
+    inset 0 0 0 2px #0a1f28,
+    0 0 12px rgba(59, 255, 79, 0.4);
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, 
+    var(--neon-green) 0%, 
+    #2de6ff 50%, 
+    var(--neon-green) 100%);
+  background-size: 200% 100%;
+  animation: loadingShimmer 1.5s linear infinite;
+  box-shadow: 0 0 16px rgba(59, 255, 79, 0.6);
+  transition: width 0.3s ease;
+}
+
+.loading-percent {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(16px, 1.6vw, 22px);
+  margin-top: 18px;
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(59, 255, 79, 0.7);
+}
+
+@keyframes loadingShimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 .nokia-banner-ad {
@@ -479,7 +506,7 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   overflow-y: auto;
   transition: opacity 0.3s ease;
 }
@@ -491,13 +518,15 @@ button:active {
 
 .gallery-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
   background: linear-gradient(160deg, rgba(15, 34, 85, 0.97), rgba(7, 16, 40, 0.98));
   border: 4px solid #d8e6ff;
   box-shadow:
     inset 0 0 0 3px #4f699d,
     0 12px 32px rgba(0, 0, 0, 0.7);
-  padding: 20px;
+  padding: 18px;
   border-radius: 8px;
 }
 
@@ -505,14 +534,14 @@ button:active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
   border-bottom: 3px solid #3bff4f;
 }
 
 .gallery-header h2 {
   font-family: 'Press Start 2P', monospace;
-  font-size: clamp(14px, 2vw, 20px);
+  font-size: clamp(12px, 1.8vw, 18px);
   color: #ffe470;
   text-shadow: 2px 2px 0 #000;
   letter-spacing: 1px;
@@ -523,11 +552,11 @@ button:active {
   background: linear-gradient(180deg, #f5fbff 0%, #9fb4df 100%);
   border: 2px solid #eaf3ff;
   color: #00112e;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   cursor: pointer;
   font-family: 'Press Start 2P', monospace;
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   border-radius: 50%;
   box-shadow:
@@ -539,6 +568,7 @@ button:active {
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .gallery-close:hover {
@@ -551,39 +581,117 @@ button:active {
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
-.gallery-grid img {
+.gallery-thumb {
   width: 100%;
-  height: 300px;
-  object-fit: contain;
+  height: 200px;
+  object-fit: cover;
   background: rgba(0, 0, 0, 0.4);
   border: 3px solid #3bff4f;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   image-rendering: auto;
 }
 
-.gallery-grid img:hover {
+.gallery-thumb:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 24px rgba(59, 255, 79, 0.4);
   border-color: #ffe470;
 }
 
+/* Lightbox Viewer */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(180deg, #f5fbff 0%, #9fb4df 100%);
+  border: 2px solid #eaf3ff;
+  color: #00112e;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 32px;
+  line-height: 1;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 -3px 0 #506796,
+    inset 0 2px 0 #ffffff,
+    0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.12s ease, filter 0.16s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 301;
+}
+
+.lightbox-close:hover {
+  filter: brightness(1.08);
+}
+
+.lightbox-close:active {
+  transform: scale(0.95);
+}
+
+#lightbox-img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border: 4px solid #3bff4f;
+  box-shadow: 0 0 40px rgba(59, 255, 79, 0.3);
+}
+
 @media (max-width: 820px) {
   .gallery-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
   }
 
-  .gallery-grid img {
-    height: 240px;
+  .gallery-thumb {
+    height: 150px;
   }
 
   .gallery-container {
-    padding: 16px;
+    padding: 14px;
+    max-height: 80vh;
+  }
+
+  .gallery-header h2 {
+    font-size: 11px;
+  }
+
+  #lightbox-img {
+    max-width: 95%;
+    max-height: 95%;
+  }
+
+  .lightbox-close {
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
   }
 }
