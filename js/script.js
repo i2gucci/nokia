@@ -112,6 +112,188 @@ let hasPlayedRingtone = false;
 
 const phoneController = createPhoneController();
 
+const snakeGame = {
+  cols: 16,
+  rows: 9,
+  tickMs: 145,
+  lastTickAt: 0,
+  snake: [],
+  direction: { x: 1, y: 0 },
+  pendingDirection: { x: 1, y: 0 },
+  food: { x: 0, y: 0 },
+  score: 0,
+  highScore: 42,
+  gameOver: false,
+  paused: false,
+  initialized: false
+};
+
+function randomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function isSnakeCell(x, y) {
+  return snakeGame.snake.some((segment) => segment.x === x && segment.y === y);
+}
+
+function spawnSnakeFood() {
+  const maxAttempts = snakeGame.cols * snakeGame.rows;
+  for (let i = 0; i < maxAttempts; i += 1) {
+    const x = randomInt(snakeGame.cols);
+    const y = randomInt(snakeGame.rows);
+    if (!isSnakeCell(x, y)) {
+      snakeGame.food = { x, y };
+      return;
+    }
+  }
+
+  snakeGame.food = { x: -1, y: -1 };
+}
+
+function startSnakeGame(now = performance.now()) {
+  const midX = Math.floor(snakeGame.cols / 2);
+  const midY = Math.floor(snakeGame.rows / 2);
+  snakeGame.snake = [
+    { x: midX, y: midY },
+    { x: midX - 1, y: midY },
+    { x: midX - 2, y: midY }
+  ];
+  snakeGame.direction = { x: 1, y: 0 };
+  snakeGame.pendingDirection = { x: 1, y: 0 };
+  snakeGame.score = 0;
+  snakeGame.gameOver = false;
+  snakeGame.paused = false;
+  snakeGame.initialized = true;
+  snakeGame.lastTickAt = now;
+  spawnSnakeFood();
+}
+
+function queueSnakeDirection(nextX, nextY) {
+  if (snakeGame.gameOver) {
+    return;
+  }
+
+  const current = snakeGame.direction;
+  if (nextX === -current.x && nextY === -current.y) {
+    return;
+  }
+
+  snakeGame.pendingDirection = { x: nextX, y: nextY };
+}
+
+function handleSnakeInput(actionEvent) {
+  if (!actionEvent) {
+    return false;
+  }
+
+  if (actionEvent.action === 'back') {
+    return false;
+  }
+
+  if (actionEvent.action === 'select') {
+    if (snakeGame.gameOver) {
+      startSnakeGame();
+    } else {
+      snakeGame.paused = !snakeGame.paused;
+    }
+    return true;
+  }
+
+  if (actionEvent.action === 'up') {
+    queueSnakeDirection(0, -1);
+    return true;
+  }
+  if (actionEvent.action === 'down') {
+    queueSnakeDirection(0, 1);
+    return true;
+  }
+  if (actionEvent.action === 'left') {
+    queueSnakeDirection(-1, 0);
+    return true;
+  }
+  if (actionEvent.action === 'right') {
+    queueSnakeDirection(1, 0);
+    return true;
+  }
+
+  if (actionEvent.action === 'digit') {
+    if (actionEvent.value === '2') {
+      queueSnakeDirection(0, -1);
+      return true;
+    }
+    if (actionEvent.value === '8') {
+      queueSnakeDirection(0, 1);
+      return true;
+    }
+    if (actionEvent.value === '4') {
+      queueSnakeDirection(-1, 0);
+      return true;
+    }
+    if (actionEvent.value === '6') {
+      queueSnakeDirection(1, 0);
+      return true;
+    }
+    if (actionEvent.value === '5' && !snakeGame.gameOver) {
+      snakeGame.paused = !snakeGame.paused;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function updateSnakeGame(now) {
+  const appState = phoneController.getState();
+  if (appState.view !== 'snake_playing' || !snakeGame.initialized) {
+    return;
+  }
+
+  if (snakeGame.paused || snakeGame.gameOver) {
+    snakeGame.lastTickAt = now;
+    return;
+  }
+
+  if (now - snakeGame.lastTickAt < snakeGame.tickMs) {
+    return;
+  }
+
+  snakeGame.lastTickAt = now;
+  snakeGame.direction = { ...snakeGame.pendingDirection };
+
+  const head = snakeGame.snake[0];
+  const nextHead = {
+    x: head.x + snakeGame.direction.x,
+    y: head.y + snakeGame.direction.y
+  };
+
+  const ateFood = nextHead.x === snakeGame.food.x && nextHead.y === snakeGame.food.y;
+  const occupiedSegments = ateFood
+    ? snakeGame.snake
+    : snakeGame.snake.slice(0, snakeGame.snake.length - 1);
+  const hitSelf = occupiedSegments.some((segment) => segment.x === nextHead.x && segment.y === nextHead.y);
+
+  if (
+    nextHead.x < 0 ||
+    nextHead.x >= snakeGame.cols ||
+    nextHead.y < 0 ||
+    nextHead.y >= snakeGame.rows ||
+    hitSelf
+  ) {
+    snakeGame.gameOver = true;
+    snakeGame.highScore = Math.max(snakeGame.highScore, snakeGame.score);
+    return;
+  }
+
+  snakeGame.snake.unshift(nextHead);
+  if (ateFood) {
+    snakeGame.score += 10;
+    snakeGame.highScore = Math.max(snakeGame.highScore, snakeGame.score);
+    spawnSnakeFood();
+  } else {
+    snakeGame.snake.pop();
+  }
+}
+
 // Raycaster input dependencies
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -319,9 +501,68 @@ function drawRetroScreen() {
     softRight = 'Back';
     retroCtx.fillText('Snake', 16, 80);
     retroCtx.font = '16px monospace';
-    retroCtx.fillText('Classic mode demo', 16, 108);
-    retroCtx.fillText('High Score: 042', 16, 130);
-    retroCtx.fillText('Press Select', 16, 152);
+    retroCtx.fillText('Classic mode', 16, 108);
+    retroCtx.fillText(`High Score: ${String(snakeGame.highScore).padStart(3, '0')}`, 16, 130);
+    retroCtx.fillText('Select to start', 16, 152);
+    retroCtx.fillText('Use 2 4 6 8', 16, 174);
+  }
+
+  if (appState.view === 'snake_playing') {
+    softLeft = snakeGame.gameOver ? 'Retry' : (snakeGame.paused ? 'Resume' : 'Pause');
+    softRight = 'Back';
+
+    retroCtx.fillText('Snake', 16, 80);
+    retroCtx.font = '16px monospace';
+    retroCtx.fillText(`Score ${String(snakeGame.score).padStart(3, '0')}`, 16, 102);
+    retroCtx.fillText(`Best ${String(snakeGame.highScore).padStart(3, '0')}`, 170, 102);
+
+    const boardX = 16;
+    const boardY = 110;
+    const boardW = w - 32;
+    const boardH = 84;
+    const cellW = Math.floor(boardW / snakeGame.cols);
+    const cellH = Math.floor(boardH / snakeGame.rows);
+    const cellSize = Math.max(3, Math.min(cellW, cellH));
+    const drawW = cellSize * snakeGame.cols;
+    const drawH = cellSize * snakeGame.rows;
+
+    retroCtx.strokeStyle = '#1b3710';
+    retroCtx.lineWidth = 2;
+    retroCtx.strokeRect(boardX - 1, boardY - 1, drawW + 2, drawH + 2);
+
+    retroCtx.fillStyle = 'rgba(27, 55, 16, 0.15)';
+    retroCtx.fillRect(boardX, boardY, drawW, drawH);
+
+    retroCtx.fillStyle = '#1b3710';
+    for (let i = 0; i < snakeGame.snake.length; i += 1) {
+      const part = snakeGame.snake[i];
+      retroCtx.fillRect(
+        boardX + part.x * cellSize + 1,
+        boardY + part.y * cellSize + 1,
+        cellSize - 2,
+        cellSize - 2
+      );
+    }
+
+    if (snakeGame.food.x >= 0 && snakeGame.food.y >= 0) {
+      retroCtx.fillStyle = '#2f5d1a';
+      retroCtx.fillRect(
+        boardX + snakeGame.food.x * cellSize + 2,
+        boardY + snakeGame.food.y * cellSize + 2,
+        Math.max(2, cellSize - 4),
+        Math.max(2, cellSize - 4)
+      );
+    }
+
+    retroCtx.fillStyle = '#1b3710';
+    retroCtx.font = '14px monospace';
+    if (snakeGame.gameOver) {
+      retroCtx.fillText('GAME OVER - Select', 16, 206);
+    } else if (snakeGame.paused) {
+      retroCtx.fillText('PAUSED - Select', 16, 206);
+    } else {
+      retroCtx.fillText('2 4 6 8 to move', 16, 206);
+    }
   }
 
   if (appState.view === 'settings') {
@@ -390,9 +631,9 @@ function createLorePanelTexture(panel) {
   const sidePadding = 86;
   const textWidth = width - 160;
 
-  scratchCtx.font = '700 34px "Press Start 2P", monospace';
+  scratchCtx.font = '700 34px "Michroma", sans-serif';
   const titleLines = getWrappedLines(scratchCtx, panel.title, textWidth);
-  scratchCtx.font = '32px "VT323", monospace';
+  scratchCtx.font = '700 32px "Titillium Web", sans-serif';
   const bodyLines = getWrappedLines(scratchCtx, panel.body, textWidth);
 
   const titleLineHeight = 42;
@@ -411,35 +652,64 @@ function createLorePanelTexture(panel) {
   const ctx = canvas.getContext('2d');
 
   const bgGradient = ctx.createLinearGradient(0, 0, width, canvas.height);
-  bgGradient.addColorStop(0, 'rgba(8, 23, 61, 0.96)');
-  bgGradient.addColorStop(1, 'rgba(2, 9, 26, 0.98)');
+  bgGradient.addColorStop(0, 'rgba(27, 79, 188, 0.96)');
+  bgGradient.addColorStop(0.55, 'rgba(19, 56, 144, 0.98)');
+  bgGradient.addColorStop(1, 'rgba(9, 31, 92, 0.98)');
   ctx.fillStyle = bgGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = '#dce9ff';
-  ctx.lineWidth = 14;
+  const radialGlow = ctx.createRadialGradient(width * 0.18, 0, 40, width * 0.2, canvas.height * 0.18, width * 0.75);
+  radialGlow.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+  radialGlow.addColorStop(0.4, 'rgba(132, 219, 255, 0.17)');
+  radialGlow.addColorStop(1, 'rgba(132, 219, 255, 0)');
+  ctx.fillStyle = radialGlow;
+  ctx.fillRect(0, 0, width, canvas.height);
+
+  ctx.strokeStyle = 'rgba(161, 221, 255, 0.22)';
+  ctx.lineWidth = 1;
+  for (let gx = 36; gx < canvas.width - 36; gx += 42) {
+    ctx.beginPath();
+    ctx.moveTo(gx, 30);
+    ctx.lineTo(gx, canvas.height - 30);
+    ctx.stroke();
+  }
+  for (let gy = 32; gy < canvas.height - 28; gy += 30) {
+    ctx.beginPath();
+    ctx.moveTo(30, gy);
+    ctx.lineTo(canvas.width - 30, gy);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#f6fbff';
+  ctx.lineWidth = 16;
   ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
 
-  ctx.strokeStyle = '#3b5a92';
+  ctx.strokeStyle = '#486eb6';
   ctx.lineWidth = 6;
   ctx.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
+
+  const chromeEdge = ctx.createLinearGradient(0, 20, 0, canvas.height - 20);
+  chromeEdge.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+  chromeEdge.addColorStop(1, 'rgba(132, 167, 230, 0.2)');
+  ctx.fillStyle = chromeEdge;
+  ctx.fillRect(26, 26, canvas.width - 52, 16);
 
   ctx.fillStyle = panel.accent;
   ctx.fillRect(26, 26, 24, canvas.height - 52);
 
-  ctx.fillStyle = '#ffe470';
-  ctx.font = '700 34px "Press Start 2P", monospace';
+  ctx.fillStyle = '#f1f56f';
+  ctx.font = '700 34px "Michroma", sans-serif';
   wrapPanelText(ctx, panel.title, sidePadding, 96, textWidth, titleLineHeight, 2);
 
-  ctx.strokeStyle = 'rgba(195, 216, 255, 0.7)';
+  ctx.strokeStyle = 'rgba(236, 246, 255, 0.78)';
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.moveTo(sidePadding, dividerY);
   ctx.lineTo(canvas.width - 74, dividerY);
   ctx.stroke();
 
-  ctx.fillStyle = '#edf6ff';
-  ctx.font = '32px "VT323", monospace';
+  ctx.fillStyle = '#f4f9ff';
+  ctx.font = '700 30px "Titillium Web", sans-serif';
   wrapPanelText(ctx, panel.body, sidePadding, bodyStartY, textWidth, bodyLineHeight, 18);
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -453,9 +723,11 @@ function createLorePanelTexture(panel) {
 function createLorePanels3D() {
   const panelWidth = 1.48;
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: 0x132a59,
-    metalness: 0.25,
-    roughness: 0.55
+    color: 0xc3d6ff,
+    emissive: 0x2f58b6,
+    emissiveIntensity: 0.18,
+    metalness: 0.66,
+    roughness: 0.24
   });
 
   const panelPositions = [
@@ -639,11 +911,27 @@ function dispatchPhoneAction(actionEvent) {
     return;
   }
 
+  const beforeView = phoneController.getState().view;
+
+  if (beforeView === 'snake_playing' && handleSnakeInput(actionEvent)) {
+    return;
+  }
+
   if (actionEvent.isNumber) {
     playNumberSound();
   }
 
   phoneController.dispatch(actionEvent.action, actionEvent.value || '');
+
+  const afterView = phoneController.getState().view;
+  if (beforeView !== 'snake_playing' && afterView === 'snake_playing') {
+    startSnakeGame();
+  }
+
+  if (beforeView === 'snake_playing' && afterView !== 'snake_playing') {
+    snakeGame.gameOver = false;
+    snakeGame.paused = false;
+  }
 }
 
 function onMouseClick(event) {
@@ -697,8 +985,11 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-function animate() {
+function animate(now = performance.now()) {
   requestAnimationFrame(animate);
+  updateSnakeGame(now);
+  lorePanelGroup.position.y = Math.sin(now * 0.00065) * 0.03;
+  lorePanelGroup.rotation.z = Math.sin(now * 0.00028) * 0.012;
   drawRetroScreen();
   controls.update();
   renderer.render(scene, camera);

@@ -130,7 +130,24 @@ export function createPhoneController() {
       return;
     }
 
-    if (state.view === 'snake' || state.view === 'settings') {
+    if (state.view === 'snake') {
+      if (action === 'select') {
+        state.view = 'snake_playing';
+      }
+      if (action === 'back') {
+        state.view = 'menu';
+      }
+      return;
+    }
+
+    if (state.view === 'snake_playing') {
+      if (action === 'back') {
+        state.view = 'snake';
+      }
+      return;
+    }
+
+    if (state.view === 'settings') {
       if (action === 'back') {
         state.view = 'menu';
       }
